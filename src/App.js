@@ -3,18 +3,36 @@ import "./App.css";
 import Auth from "./components/Auth";
 import Layout from "./components/Layout";
 //grabs from store
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Notification from "./components/Notification";
+import { uiActions } from "./store/ui-slice";
 
+//checks if it is first render, then stops the useeffect from rendering the alert that pops up right away.
+let isFirstRender = true;
 function App() {
+  const dispatch = useDispatch();
+  const notification = useSelector((state) => state.ui.notification);
   //grab cart state, then send https rquest
   const cart = useSelector((state) => state.cart);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
   useEffect(() => {
+    if(isFirstRender) {
+      isFirstRender = false;
+      return
+    }
+    //update state for notification
+    dispatch(
+      uiActions.showNotification({
+        open: true,
+        message: "sending request",
+        type: "warning",
+      })
+    );
     //created a realtime database, updated rules, then grabbed url for the new created api. added 'cartItems.json'. .json always needs to be there
     const sendRequest = async () => {
       const response = await fetch(
+        //sends state
         "https://reduxcart-d3878-default-rtdb.firebaseio.com/cartItems.json",
         {
           method: "PUT",
@@ -22,13 +40,30 @@ function App() {
         }
       );
       const data = await response.json();
+      //send state for notification success
+      dispatch(
+        uiActions.showNotification({
+          open: true,
+          message: "sent request successfully",
+          type: "success",
+        })
+      );
     };
-    sendRequest();
+    sendRequest().catch((error) => {
+      //send state as error
+      dispatch(
+        uiActions.showNotification({
+          open: true,
+          message: "failed request",
+          type: "error",
+        })
+      );
+    });
   }, [cart]);
 
   return (
     <div className="App">
-      <Notification type='success' message={'dummy message'}/>
+      {notification && <Notification type={notification.type} message={notification.message} />}
       {!isLoggedIn && <Auth />}
       {isLoggedIn && <Layout />}
     </div>

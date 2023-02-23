@@ -5,7 +5,7 @@ const uiSlice = createSlice({
   initialState: {
     notification: null,
   },
-  reducer: {
+  reducers: {
     showNotification(state, action) {
       state.notification = {
         message: action.payload.message,
