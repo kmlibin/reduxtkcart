@@ -6,11 +6,17 @@ const cartSlice = createSlice({
     itemsList: [],
     totalQuantity: 0,
     showCart: false,
+    changed: false,
   },
   reducers: {
+    replaceData(state, action) {
+      state.totalQuantity = action.payload.totalQuantity;
+      state.itemsList = action.payload.itemsList;
+    },
     addToCart(state, action) {
+      state.changed = true;
       const newItem = action.payload;
-      console.log(newItem.price);
+
       //check if item is present, then add to quantity
       const existingItem = state.itemsList.find(
         (item) => item.id === newItem.id
@@ -32,20 +38,20 @@ const cartSlice = createSlice({
       }
     },
     removeFromCart(state, action) {
+      state.changed = true;
       //payload sends the id
       const id = action.payload;
 
       //checks if the id is in the itemsList
       const existingItem = state.itemsList.find((item) => item.id === id);
       if (existingItem.quantity === 1) {
-
         //we only want items to be on the list if they are not equal to the payload id
         state.itemsList = state.itemsList.filter((item) => item.id !== id);
-        state.totalQuantity--
+        state.totalQuantity--;
       } else {
         existingItem.quantity--;
         existingItem.totalPrice -= existingItem.price;
-        state.totalQuantity--
+        state.totalQuantity--;
       }
     },
     setShowCart(state) {
