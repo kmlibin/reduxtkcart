@@ -17,6 +17,7 @@ const cartSlice = createSlice({
       );
       if (existingItem) {
         existingItem.quantity++;
+        //update totalPrice by adding the price of item added...remember, each item in the list has a quantity and total price field.
         existingItem.totalPrice += newItem.price;
         state.totalQuantity++;
       } else {
